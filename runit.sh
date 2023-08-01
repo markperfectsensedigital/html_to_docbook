@@ -13,7 +13,7 @@ if [ $? != 0 ]; then
 fi
 echo "Validated ugly.xml..."
 
-xmllint --format --output dockbook.xml ugly.xml
+xmllint --format --output docbook.xml ugly.xml
 if [ $? != 0 ]; then
   echo "Could not format ugly.xml into docbook.xml";
   exit

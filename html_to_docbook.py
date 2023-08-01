@@ -6,9 +6,23 @@
 # xmllint --format --output dockbook.xml ugly.xml
 from bs4 import BeautifulSoup
 import sys
+import re
 
 def spacer(num_tabs):
   return "\t" * num_tabs
+
+#regular expressions
+re_paragraph_html = r'(<[/]?)p>'
+re_paragraph_db = r'\1para>'
+
+re_bold_html = r'<b>(.*?)</b>'
+re_bold_docbook = r'<emphasis role="bold">\1</emphasis>'
+
+re_term_html = r'<span class="Term">(.*?)</span>'
+re_term_docbook = r'\1'
+
+re_newline_html = r'<br[/]?>'
+re_newline_docbook = r''
 
 xml_file = open("ugly.xml", "w")
 xml_file.write("<?xml version='1.0'?>\n")
@@ -26,24 +40,16 @@ with open("gs.html") as fp:
 
 
 	body_paragraphs = soup.find('main').find_all('p')
-#	print(body_paragraphs)
 	for paragraph in body_paragraphs:
-		xml_file.write('<para>{0}</para>\n'.format(paragraph.get_text().strip()))
-#		print(paragraph)
-		inside = paragraph.find_all()
-#		print("inside")
-#		print(inside)
-#		print("outside")
-#		rst.write('{0}\n\n'.format(paragraph.get_text()))
-#	for sibling in body_element.find_next_siblings():
-#		if sibling.name == 'p':
-#			rst.write('{0}\n\n'.format(sibling.get_text()))
-#		if sibling.name == 'ul':
-#			line_item = sibling.find('li')
-#			rst.write('{0}\n\n'.format(line_item.get_text()))
-#			for sibling_line_item in line_item.find_next_siblings():
-#				rst.write('* {0}\n\n'.format(sibling_line_item.get_text()))
-		
+		local_paragraph = str(paragraph).strip()
+		#print(local_paragraph)
+		db_version = re.sub(re_paragraph_html,re_paragraph_db,local_paragraph)
+		db_version = re.sub(re_bold_html,re_bold_docbook,db_version)
+		db_version = re.sub(re_term_html,re_term_docbook,db_version)
+		db_version = re.sub(re_newline_html,re_newline_docbook,db_version)
+		db_version = db_version.replace('\x0a','')
+		print(db_version)
+		xml_file.write(db_version)
 
 	xml_file.write('</section>\n')
 #fp.close()
