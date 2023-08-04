@@ -7,8 +7,10 @@ import sys
 import requests
 import argparse
 import validators
-import urllib.parse 
-
+import urllib.parse
+import os
+import shutil
+from pathlib import Path
 
 
 class MySpider(SitemapSpider):
@@ -73,6 +75,13 @@ ignored_urls = ['https://www.brightspot.com/documentation/', 'https://www.bright
 
 headers= {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'}
 
+
+dirpath = 'xml_extracts'
+if os.path.exists(dirpath):
+	shutil.rmtree(dirpath, ignore_errors=True)
+os.mkdir(dirpath)
+
+
 for my_url in url_list:
 	if my_url in ignored_urls:
 		continue
@@ -88,9 +97,8 @@ for my_url in url_list:
 	parsed_url = urllib.parse.urlparse(my_url)
 	my_url_path = parsed_url.path
 	my_url_path = my_url_path[1:]
-	print(my_url_path)
 	my_url_path = my_url_path.replace('/','-')
-	print(my_url_path)
+	my_url_path = dirpath + '/' + my_url_path
 	
 	temporary_xml = open(my_url_path +".xml", "w")
 	soup = BeautifulSoup(response.text, 'html.parser')
