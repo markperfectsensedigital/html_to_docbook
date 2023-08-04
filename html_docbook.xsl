@@ -5,12 +5,9 @@
     <xsl:output method="xml" indent="true"/>
     <xsl:template match="/">
         <book xmlns="http://docbook.org/ns/docbook">
-            <title>
-                <xsl:value-of select="normalize-space(descendant::h1[@class='CreativeWorkPage-headline'])"/>
-            </title>
-    <chapter>
-    <title>Editorial Documentation</title>
-
+            <title>Brightspot Documentation</title>
+        <chapter>
+        <title>Editorial Documentation</title>
             <xsl:apply-templates select="descendant::div[@class='StepModule-body RichTextBody']"/>
     </chapter>
         </book>
@@ -18,6 +15,9 @@
 
     <xsl:template match="div">
     <section>
+        <title>
+                <xsl:value-of select="normalize-space(descendant::h1[@class='CreativeWorkPage-headline'])"/>
+            </title>
         <xsl:apply-templates select="p"/>
         </section>
     </xsl:template>
