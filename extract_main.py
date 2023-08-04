@@ -6,6 +6,7 @@ from scrapy.crawler import CrawlerProcess
 import sys
 import requests
 import argparse
+import validators
 
 
 
@@ -30,6 +31,8 @@ args = parser.parse_args()
 print("Running with following options:")
 print("* Crawl sitemaps: {}".format(args.crawl))
 print("")
+
+RESPONSE_CODE_BAD_MIN = 400
 url_list = []
 url_filename = 'urls.txt'
 
@@ -70,8 +73,18 @@ ignored_urls = ['https://www.brightspot.com/documentation/', 'https://www.bright
 headers= {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'}
 
 for my_url in url_list:
-	r = requests.get(myurl)
-	print(r.text)
+	if my_url in ignored_urls:
+		continue
+	if not (validators.url(my_url)):
+		print("The following url is invalid, skipping: {0}".format(my_url))
+		continue
+
+	response = requests.get(my_url)
+	if response.status_code >= RESPONSE_CODE_BAD_MIN:
+		print("The following URL gave a status code of {0}: {1}".format(response.status_code,my_url))
+		continue
+
+	print(response.text)
 	sys.exit()
 
 
