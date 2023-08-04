@@ -7,6 +7,7 @@ import sys
 import requests
 import argparse
 import validators
+import urllib.parse 
 
 
 
@@ -84,21 +85,25 @@ for my_url in url_list:
 		print("The following URL gave a status code of {0}: {1}".format(response.status_code,my_url))
 		continue
 
-	print(response.text)
+	parsed_url = urllib.parse.urlparse(my_url)
+	my_url_path = parsed_url.path
+	my_url_path = my_url_path[1:]
+	print(my_url_path)
+	my_url_path = my_url_path.replace('/','-')
+	print(my_url_path)
+	
+	temporary_xml = open(my_url_path +".xml", "w")
+	soup = BeautifulSoup(response.text, 'html.parser')
+	main = soup.find('main')
+	main_str = str(main)
+	main_str = main_str.replace('\x0a','')
+	main_str = main_str.replace('<main','<main xmlns="http://www.w3.org/TR/html4/"')
+	temporary_xml.write(main_str)
+	temporary_xml.close()
+
 	sys.exit()
 
 
 sys.exit()
 
 
-temporary_xml = open("temporary.xml", "w")
-with open("gs.html") as fp:
-	soup = BeautifulSoup(fp, 'html.parser')
-	main = soup.find('main')
-	main_str = str(main)
-	main_str = main_str.replace('\x0a','')
-	main_str = main_str.replace('<main','<main xmlns="http://www.w3.org/TR/html4/"')
-	temporary_xml.write(main_str)
-
-fp.close()
-temporary_xml.close()
