@@ -30,10 +30,13 @@ parser = argparse.ArgumentParser(
                     description='Retrieves all HTML files in Brightspot\'s documentation sitemaps.',
                     )
 parser.add_argument('-c','--crawl',action='store_const',const=False, default=False, help="Crawls the sitemaps to generate a list of URLs in the documentation set.")
+parser.add_argument('-d','--download', action=argparse.BooleanOptionalAction, default=False, help="Downloads the HTML files listed in the crawled sitemaps, and places them in the directory html_downloads/.")
 parser.add_argument('-e','--extract',action='store_const',const=False, default=False, help="Extracts the <main> element from the raw HTML file into an XML file in the directory xml_extracts/.")
 args = parser.parse_args()
 print("Running with following options:")
 print("* Crawl sitemaps: {}".format(args.crawl))
+print("* Download HTML files: {}".format(args.download))
+print("* Extract XML from HTML files: {}".format(args.extract))
 print("")
 
 RESPONSE_CODE_BAD_MIN = 400
@@ -74,14 +77,45 @@ else:
 
 
 xml_extract_path = 'xml_extracts'
+html_download_path = 'html_downloads'
 
-if args.extract == True:
+if args.download == True:
+	if os.path.exists(html_download_path):
+		shutil.rmtree(html_download_path, ignore_errors=True)
+	os.mkdir(html_download_path)
+
 	ignored_urls = ['https://www.brightspot.com/documentation/', 'https://www.brightspot.com/documentation/4-2-x-x', 'https://www.brightspot.com/documentation/4-5-x-x', 'https://www.brightspot.com/documentation/4-7-releases']
 
 	headers= {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'}
 
+	for my_url in url_list:
+		if my_url in ignored_urls:
+			continue
+		if not (validators.url(my_url)):
+			print("The following url is invalid, skipping: {0}".format(my_url))
+			continue
+		print("Downloading URL {0}".format(my_url))
+		response = requests.get(my_url)
+		if response.status_code >= RESPONSE_CODE_BAD_MIN:
+			print("The following URL gave a status code of {0}: {1}".format(response.status_code,my_url))
+			continue
 
-	
+		# Create a friendly path for the written file.
+		parsed_url = urllib.parse.urlparse(my_url)
+		my_url_path = parsed_url.path
+		my_url_path = my_url_path[1:] # Drop first character which is a leading slash
+		my_url_path = my_url_path.replace('/','-')
+		my_url_path = html_download_path + '/' + my_url_path
+		
+		temporary_html = open(my_url_path +".html", "w")
+		temporary_html.write(response.text)
+		temporary_html.close()
+
+
+sys.exit()
+
+if args.extract == True:
+
 	if os.path.exists(xml_extract_path):
 		shutil.rmtree(xml_extract_path, ignore_errors=True)
 	os.mkdir(xml_extract_path)
