@@ -29,9 +29,9 @@ parser = argparse.ArgumentParser(
                     prog='Documentation Retriever',
                     description='Retrieves all HTML files in Brightspot\'s documentation sitemaps.',
                     )
-parser.add_argument('-c','--crawl',action='store_const',const=False, default=False, help="Crawls the sitemaps to generate a list of URLs in the documentation set.")
+parser.add_argument('-c','--crawl',action=argparse.BooleanOptionalAction, default=False, help="Crawls the sitemaps to generate a list of URLs in the documentation set.")
 parser.add_argument('-d','--download', action=argparse.BooleanOptionalAction, default=False, help="Downloads the HTML files listed in the crawled sitemaps, and places them in the directory html_downloads/.")
-parser.add_argument('-e','--extract',action='store_const',const=False, default=False, help="Extracts the <main> element from the raw HTML file into an XML file in the directory xml_extracts/.")
+parser.add_argument('-e','--extract',action=argparse.BooleanOptionalAction, default=False, help="Extracts the <main> element from the raw HTML file into an XML file in the directory xml_extracts/.")
 args = parser.parse_args()
 print("Running with following options:")
 print("* Crawl sitemaps: {}".format(args.crawl))
@@ -80,6 +80,7 @@ xml_extract_path = 'xml_extracts'
 html_download_path = 'html_downloads'
 
 if args.download == True:
+	print("Downloading HTML files from crawled sitemaps.")
 	if os.path.exists(html_download_path):
 		shutil.rmtree(html_download_path, ignore_errors=True)
 	os.mkdir(html_download_path)
@@ -111,46 +112,47 @@ if args.download == True:
 		temporary_html.write(response.text)
 		temporary_html.close()
 
-
-sys.exit()
-
 if args.extract == True:
+	print("Extracting XML from downloaded HTML files...")
+	if not os.path.exists(html_download_path):
+		print("The path {0} does not exist. Rerun this command with the --download option.")
+		sys.exit()
 
 	if os.path.exists(xml_extract_path):
 		shutil.rmtree(xml_extract_path, ignore_errors=True)
 	os.mkdir(xml_extract_path)
 
-	for my_url in url_list:
-		if my_url in ignored_urls:
-			continue
-		if not (validators.url(my_url)):
-			print("The following url is invalid, skipping: {0}".format(my_url))
-			continue
-		print("Processing URL {0}".format(my_url))
-		response = requests.get(my_url)
-		if response.status_code >= RESPONSE_CODE_BAD_MIN:
-			print("The following URL gave a status code of {0}: {1}".format(response.status_code,my_url))
-			continue
-
-		parsed_url = urllib.parse.urlparse(my_url)
-		my_url_path = parsed_url.path
-		my_url_path = my_url_path[1:]
-		my_url_path = my_url_path.replace('/','-')
-		my_url_path = xml_extract_path + '/' + my_url_path
+	raw_html_files = os.listdir(html_download_path)
 		
-		temporary_xml = open(my_url_path +".xml", "w")
+	for my_raw_file in raw_html_files:
+		print("Processing file {0}".format(my_raw_file))
+		temporary_html = None
+
 		try:
-			soup = BeautifulSoup(response.text, 'html.parser')
+			temporary_html_file = open(html_download_path + '/' + my_raw_file,"r")
+			temporary_html = temporary_html_file.read()
+			temporary_html_file.close()
+		except  Exception as e:
+			print("Exception occurred: {0} for URI {1}, skipping".format(type(e).__name__, my_raw_file))
+			continue
+		temporary_xml_filename = xml_extract_path + '/' + my_raw_file
+		temporary_xml_filename = temporary_xml_filename.replace(".html",".xml")
+		temporary_xml = open(temporary_xml_filename, "w")
+		try:
+			soup = BeautifulSoup(temporary_html, 'html.parser')
 			main = soup.find('main')
+			meta = soup.find('meta',{'name': 'brightspot.contentId'})
+			id = meta['content']
 		except Exception as e:
-			print("Exception occurred: {0} for URL {1}".format(type(e).__name__), my_url)
+			print("Exception occurred: {0} for URI {1}".format(type(e).__name__), my_raw_file)
 			sys.exit()
 		main_str = str(main)
 		main_str = main_str.replace('\x0a','')
-		main_str = main_str.replace('<main','<main xmlns="http://www.w3.org/TR/html4/"')
+		main_str = main_str.replace('<main','<?xml version="1.0"?>\n<main xmlns="http://www.w3.org/TR/html4/" id="{0}"'.format(id))
 		temporary_xml.write(main_str)
 		temporary_xml.close()
 
+sys.exit()
 for xml_input_file in os.listdir(xml_extract_path):
 	print(xml_input_file)
 
