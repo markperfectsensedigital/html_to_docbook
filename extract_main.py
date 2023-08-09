@@ -75,9 +75,11 @@ else:
 		print("Exception occurred: {0}".format(type(e).__name__))
 		sys.exit()
 
+print("Assembled list of URLs")
 
 xml_extract_path = 'xml_extracts'
 html_download_path = 'html_downloads'
+docbook_path = 'docbook_files'
 
 if args.download == True:
 	print("Downloading HTML files from crawled sitemaps.")
@@ -152,10 +154,22 @@ if args.extract == True:
 		temporary_xml.write(main_str)
 		temporary_xml.close()
 
-sys.exit()
+
+if os.path.exists(docbook_path):
+	shutil.rmtree(docbook_path, ignore_errors=True)
+os.mkdir(docbook_path)
+
 for xml_input_file in os.listdir(xml_extract_path):
 	print(xml_input_file)
-
+	saxon_command = "saxon -s:xml_extracts/{0} -xsl:clean_xml_extract.xsl -o:{1}/{2}".format(xml_input_file,docbook_path, xml_input_file)
+	status = os.system(saxon_command)
+	if status != 0:
+		sys.exit()
+	xmllint_command = "xmllint --schema docbook.xsd --noout {0}/{1}".format(docbook_path, xml_input_file)
+	status = os.system(xmllint_command)
+	if status != 0:
+		sys.exit()
+	sys.exit()
 sys.exit()
 
 
