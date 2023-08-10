@@ -5,7 +5,7 @@
     <xsl:output method="xml" indent="true"/>
     <xsl:include href="snippets.xsl"/>
     <xsl:template match="/">
-       
+       <xsl:message>barf</xsl:message>
         <xsl:apply-templates />
     
     </xsl:template>
@@ -19,8 +19,30 @@
     </xsl:template>
 
 
-    <xsl:template match="div">
-        <xsl:apply-templates select="p"/>
+    <xsl:template match="div[@class='StepModule-body RichTextBody']">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+
+    <xsl:template match="div[@class='Enhancement']">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="div[@class='Enhancement-item']">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="div[@class='CalloutModule' and @data-content-type='note']">
+        <note>
+        <xsl:apply-templates select="child::div[@class='CalloutModule-body RichTextBody']"/>
+        </note>
+    </xsl:template>
+
+    <xsl:template match="div[@class='CalloutModule-body RichTextBody']">
+        <para>
+            <xsl:apply-templates/>
+        </para>
+
     </xsl:template>
 
     <xsl:template match="p">
@@ -28,6 +50,11 @@
             <xsl:apply-templates/>
         </para>
     </xsl:template>
+
+    <xsl:template match="text()">
+        <xsl:value-of select="normalize-space(.)"/>
+    </xsl:template>
+
 
 
 <!-- <para>Clicking <emphasis role="bold">Restore</emphasis>, the item enters the <xref xlink:href="#UUID-da503e88-6d8f-e109-eea0-a634f7801df4" remap="UUID-be6907ad-9a53-2b82-e425-d08ea374e17a"/> state.</para>

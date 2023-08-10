@@ -127,7 +127,7 @@ if args.extract == True:
 	raw_html_files = os.listdir(html_download_path)
 		
 	for my_raw_file in raw_html_files:
-		print("Processing file {0}".format(my_raw_file))
+		print("Extracting <main> element from file {0}".format(my_raw_file))
 		temporary_html = None
 
 		try:
@@ -159,8 +159,9 @@ if os.path.exists(docbook_path):
 	shutil.rmtree(docbook_path, ignore_errors=True)
 os.mkdir(docbook_path)
 
+print("Converting extracted XML to docbook...")
 for xml_input_file in os.listdir(xml_extract_path):
-	print(xml_input_file)
+	print("Transforming file xml_extracts/{0}".format(xml_input_file))
 	saxon_command = "saxon -s:xml_extracts/{0} -xsl:clean_xml_extract.xsl -o:{1}/{2}".format(xml_input_file,docbook_path, xml_input_file)
 	status = os.system(saxon_command)
 	if status != 0:
@@ -169,7 +170,5 @@ for xml_input_file in os.listdir(xml_extract_path):
 	status = os.system(xmllint_command)
 	if status != 0:
 		sys.exit()
-	sys.exit()
-sys.exit()
 
 
