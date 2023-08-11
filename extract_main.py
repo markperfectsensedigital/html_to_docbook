@@ -7,10 +7,11 @@ import sys
 import requests
 import argparse
 import validators
-import urllib.parse
 import os
 import shutil
 from pathlib import Path
+from urllib.parse import urlparse
+from urllib.parse import parse_qs
 
 
 class MySpider(SitemapSpider):
@@ -32,10 +33,12 @@ parser = argparse.ArgumentParser(
 parser.add_argument('-c','--crawl',action=argparse.BooleanOptionalAction, default=False, help="Crawls the sitemaps to generate a list of URLs in the documentation set.")
 parser.add_argument('-d','--download', action=argparse.BooleanOptionalAction, default=False, help="Downloads the HTML files listed in the crawled sitemaps, and places them in the directory html_downloads/.")
 parser.add_argument('-e','--extract',action=argparse.BooleanOptionalAction, default=False, help="Extracts the <main> element from the raw HTML file into an XML file in the directory xml_extracts/.")
+parser.add_argument('-i','--images',action=argparse.BooleanOptionalAction, default=False, help="Downloads images in the HTML files into the folder images/.")
 args = parser.parse_args()
 print("Running with following options:")
 print("* Crawl sitemaps: {}".format(args.crawl))
 print("* Download HTML files: {}".format(args.download))
+print("* Download images from HTML files: {}".format(args.images))
 print("* Extract XML from HTML files: {}".format(args.extract))
 print("")
 
@@ -80,6 +83,7 @@ print("Assembled list of URLs")
 xml_extract_path = 'xml_extracts'
 html_download_path = 'html_downloads'
 docbook_path = 'docbook_files'
+image_path = 'images'
 
 if args.download == True:
 	print("Downloading HTML files from crawled sitemaps.")
@@ -104,7 +108,7 @@ if args.download == True:
 			continue
 
 		# Create a friendly path for the written file.
-		parsed_url = urllib.parse.urlparse(my_url)
+		parsed_url = urlparse(my_url)
 		my_url_path = parsed_url.path
 		my_url_path = my_url_path[1:] # Drop first character which is a leading slash
 		my_url_path = my_url_path.replace('/','-')
@@ -113,6 +117,43 @@ if args.download == True:
 		temporary_html = open(my_url_path +".html", "w")
 		temporary_html.write(response.text)
 		temporary_html.close()
+
+if args.images == True:
+	print("Downloding images referenced in HTML files...")
+
+	if not os.path.exists(html_download_path):
+		print("The path {0} does not exist. Rerun this command with the --download option.")
+		sys.exit()
+	
+	if os.path.exists(image_path):
+		shutil.rmtree(image_path, ignore_errors=True)
+	os.mkdir(image_path)
+
+	raw_html_files = os.listdir(html_download_path)
+	for my_raw_file in raw_html_files:
+		print("Downloading images from file {0}".format(my_raw_file))
+		parent_file = open(html_download_path + '/' + my_raw_file,'r')
+		soup = BeautifulSoup(parent_file,'html.parser')
+		figures = soup.find_all('figure')
+		if not figures:
+			continue
+		for my_figure in figures:
+			my_image = my_figure.find('img')
+			my_src = my_image['src']
+			my_parse = urlparse(my_src)
+			my_query = my_parse.query
+			my_params = parse_qs(my_query)
+			image_url = my_params['url'][0]
+			print("Image url: " + image_url)
+			image_url_parse = urlparse(image_url)
+			image_filename = image_url_parse.path
+			print("Image filename: " + image_filename)
+			file_path = image_filename[1:].replace('/','_')
+			print("File path: " + file_path)
+			response = requests.get(image_url)
+			image_file = open(image_path + '/' + file_path,'wb')
+			image_file.write(response.content)
+			image_file.close()
 
 if args.extract == True:
 	print("Extracting XML from downloaded HTML files...")
