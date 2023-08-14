@@ -154,6 +154,7 @@ if args.images == True:
 			image_file = open(image_path + '/' + file_path,'wb')
 			image_file.write(response.content)
 			image_file.close()
+		parent_file.close()
 
 if args.extract == True:
 	print("Extracting XML from downloaded HTML files...")
