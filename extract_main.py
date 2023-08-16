@@ -12,6 +12,7 @@ import shutil
 from pathlib import Path
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
+from dict2xml import dict2xml
 
 
 class MySpider(SitemapSpider):
@@ -45,6 +46,7 @@ print("")
 RESPONSE_CODE_BAD_MIN = 400
 url_list = []
 url_filename = 'urls.txt'
+caption_dict = {}
 
 if args.crawl == True:
 	print("Crawling sitemaps...")
@@ -139,17 +141,29 @@ if args.images == True:
 			continue
 		for my_figure in figures:
 			my_image = my_figure.find('img')
+			if not my_image:
+				print("Detected a figure with no <img> tag, skipping...")
+				continue
 			my_src = my_image['src']
+			if not my_src:
+				print("Detected an image with no <src> tag, skipping...")
+				sys.exit()
 			my_parse = urlparse(my_src)
 			my_query = my_parse.query
-			my_params = parse_qs(my_query)
-			image_url = my_params['url'][0]
-			print("Image url: " + image_url)
+			print("query string: " + my_query)
+			if my_query:
+				my_params = parse_qs(my_query)
+				image_url = my_params['url'][0]
+			else:
+				image_url = my_src
 			image_url_parse = urlparse(image_url)
 			image_filename = image_url_parse.path
-			print("Image filename: " + image_filename)
 			file_path = image_filename[1:].replace('/','_')
-			print("File path: " + file_path)
+			file_path = file_path.replace(' ','_')
+			if my_image['alt']:
+				caption_dict[file_path] = my_image['alt']
+			else:
+				caption_dict[file_path] = None
 			response = requests.get(image_url)
 			image_file = open(image_path + '/' + file_path,'wb')
 			image_file.write(response.content)
