@@ -12,7 +12,7 @@ import shutil
 from pathlib import Path
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
-from dict2xml import dict2xml
+#from dict2xml import dict2xml
 
 
 class MySpider(SitemapSpider):
@@ -169,6 +169,13 @@ if args.images == True:
 			image_file.write(response.content)
 			image_file.close()
 		parent_file.close()
+		break
+	caption_file = open('caption-file.xml','w')
+	caption_file.write('<?xml version="1.0" encoding="UTF-8" ?>\n<images>\n')
+	for x, y in caption_dict.items():
+		caption_file.write("\t<image>\n\t\t<filename>{0}</filename>\n\t\t<caption>{1}</caption>\n\t</image>\n".format(x,y))
+	caption_file.write('</images>')	
+	caption_file.close()
 
 if args.extract == True:
 	print("Extracting XML from downloaded HTML files...")
