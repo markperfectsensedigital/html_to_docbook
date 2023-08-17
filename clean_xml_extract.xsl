@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xpath-default-namespace="http://www.w3.org/TR/html4/"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xpath-default-namespace="http://www.w3.org/2001/XMLSchema"
     xmlns="http://docbook.org/ns/docbook">
 
     <xsl:output method="xml" indent="true"/>
@@ -59,7 +59,7 @@
         <listitem>
             <xsl:choose>
                 <xsl:when test="not(*)">
-                <!-- Some HTML <li> tags have no child <p>, so supply those. -->
+                    <!-- Some HTML <li> tags have no child <p>, so supply those. -->
                     <para>
                         <xsl:apply-templates/>
                     </para>
@@ -74,12 +74,61 @@
 
     </xsl:template>
 
+    <!-- Figures -->
+
+    <xsl:template match="figure">
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="picture">
+        <xsl:choose>
+            <xsl:when test="following-sibling::figcaption">
+                <xsl:apply-templates select="img" mode="formal"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:apply-templates select="img" mode="informal"/>
+            </xsl:otherwise>
+            </xsl:choose>
+    </xsl:template>
 
 
+    <xsl:template match="img" mode="formal">
+        <figure>
+            <title>
+                <xsl:value-of select="../../figcaption/div/div"/>
+            </title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata>
+                    <xsl:attribute name="fileref">image/uuid-d94b1d9b-42f6-c45a-3bd5-b348d7b6841f-en.png</xsl:attribute>
+                    </imagedata>
+                </imageobject>
+            </mediaobject>
+        </figure>
+    </xsl:template>
+
+<xsl:template match="figcaption"/>
+
+
+    <xsl:template match="img" mode="informal">
+        <informalfigure>
+            <mediaobject>
+                <imageobject>
+                    <imagedata>
+                    <xsl:attribute name="fileref">image/uuid-d94b1d9b-42f6-c45a-3bd5-b348d7b6841f-en.png</xsl:attribute>
+                    </imagedata>
+                </imageobject>
+            </mediaobject>
+        </informalfigure>
+    </xsl:template>
+
+
+
+    <!-- Paragraph and text -->
     <xsl:template match="p">
         <xsl:choose>
             <xsl:when test="not(text())">
-            <!-- Do not process empty paragraphs -->
+                <!-- Do not process empty paragraphs -->
             </xsl:when>
             <xsl:otherwise>
                 <para>

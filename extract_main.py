@@ -169,7 +169,6 @@ if args.images == True:
 			image_file.write(response.content)
 			image_file.close()
 		parent_file.close()
-		break
 	caption_file = open('caption-file.xml','w')
 	caption_file.write('<?xml version="1.0" encoding="UTF-8" ?>\n<images>\n')
 	for x, y in caption_dict.items():
