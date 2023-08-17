@@ -21,7 +21,6 @@
         </section>
     </xsl:template>
 
-
     <xsl:template match="div[@class='StepModule-body RichTextBody']">
         <xsl:apply-templates/>
     </xsl:template>
@@ -107,7 +106,7 @@
         </figure>
     </xsl:template>
 
-<xsl:template match="figcaption"/>
+    <xsl:template match="figcaption"/>
 
 
     <xsl:template match="img" mode="informal">

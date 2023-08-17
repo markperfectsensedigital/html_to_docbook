@@ -224,7 +224,10 @@ os.mkdir(docbook_path)
 print("Converting extracted XML to docbook...")
 for xml_input_file in os.listdir(xml_extract_path):
 	print("Transforming file xml_extracts/{0}".format(xml_input_file))
-	saxon_command = "saxon -s:xml_extracts/{0} -xsl:clean_xml_extract.xsl -o:{1}/{2}".format(xml_input_file,docbook_path, xml_input_file)
+
+	xsl_file = 'clean_xml_extract_release_notes.xsl' if xml_input_file.startswith('documentation-release-notes') else 'clean_xml_extract_topics.xsl'
+
+	saxon_command = "saxon -s:xml_extracts/{0} -xsl:{1} -o:{2}/{3}".format(xml_input_file,xsl_file,docbook_path, xml_input_file)
 	status = os.system(saxon_command)
 	if status != 0:
 		sys.exit()
