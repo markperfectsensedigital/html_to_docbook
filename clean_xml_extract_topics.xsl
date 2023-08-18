@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xpath-default-namespace="http://www.w3.org/2001/XMLSchema"
-    xmlns="http://docbook.org/ns/docbook">
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns="http://docbook.org/ns/docbook" xpath-default-namespace="http://www.w3.org/2001/XMLSchema">
 
     <xsl:output method="xml" indent="true"/>
     <xsl:include href="snippets.xsl"/>
+
     <xsl:template match="/">
         <xsl:apply-templates />
     </xsl:template>

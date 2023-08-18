@@ -57,7 +57,7 @@
     <xsl:template match="li">
         <listitem>
             <xsl:choose>
-                <xsl:when test="not(*)">
+                <xsl:when test="not(child::p)">
                     <!-- Some HTML <li> tags have no child <p>, so supply those. -->
                     <para>
                         <xsl:apply-templates/>
