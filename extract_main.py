@@ -241,6 +241,7 @@ for xml_input_file in os.listdir(xml_extract_path):
 	if status != 0:
 		sys.exit()
 	xmllint_command = "xmllint --schema docbook.xsd --noout {0}/{1}".format(docbook_path, xml_input_file)
+	print(xmllint_command)
 	status = os.system(xmllint_command)
 	if status != 0:
 		sys.exit()

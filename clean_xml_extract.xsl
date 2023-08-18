@@ -54,6 +54,14 @@
         </itemizedlist>
     </xsl:template>
 
+    <!-- Unordered lists -->
+    <xsl:template match="ol">
+        <orderedlist>
+            <xsl:apply-templates/>
+        </orderedlist>
+    </xsl:template>
+
+
     <xsl:template match="li">
         <listitem>
             <xsl:choose>
