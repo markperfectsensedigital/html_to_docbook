@@ -153,11 +153,11 @@ adds a corresponding message to the conversation topic.</para>
     <xsl:template match="span[@class='Term']">
         <!--     <xsl:message><xsl:value-of select="."/></xsl:message> -->
         <phrase>
-            <xsl:attribute name="xml:id">
+           <!--  <xsl:attribute name="xml:id">
                 <xsl:call-template name="get_snippet_id">
                     <xsl:with-param name="text" select="."/>
                 </xsl:call-template>
-            </xsl:attribute>
+            </xsl:attribute> -->
             <xsl:apply-templates/>
         </phrase>
     </xsl:template>
@@ -167,5 +167,13 @@ adds a corresponding message to the conversation topic.</para>
             <xsl:apply-templates/>
         </emphasis>
     </xsl:template>
+
+    <xsl:template match="code">
+        <code>
+            <xsl:apply-templates/>
+        </code>
+    </xsl:template>
+
+
 
 </xsl:stylesheet>
