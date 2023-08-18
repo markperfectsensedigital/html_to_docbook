@@ -205,6 +205,10 @@ if args.extract == True:
 		try:
 			soup = BeautifulSoup(temporary_html, 'html.parser')
 			main = soup.find('main')
+			scripts = main.find_all('script')
+			for script in scripts:
+				script.decompose()
+				print("Destoryed a script")
 			meta = soup.find('meta',{'name': 'brightspot.contentId'})
 			id = meta['content']
 		except Exception as e:
@@ -226,14 +230,6 @@ for xml_input_file in os.listdir(xml_extract_path):
 	print("Transforming file xml_extracts/{0}".format(xml_input_file))
 	
 	source_file = "xml_extracts/" + xml_input_file
-
-	myfile =  open(source_file,'r')
-	file_string = myfile.read()
-	myfile.close()
-	file_string = file_string.replace('http://www.w3.org/2001/XMLSchema','http://www.w3.org/TR/html4/') 
-	myfile =  open(source_file,'w')
-	myfile.write(file_string)
-	myfile.close()
 
 	saxon_command = "saxon -s:{0} -xsl:clean_xml_extract.xsl -o:{1}/{2}".format(source_file,docbook_path, xml_input_file)
 	print(saxon_command)
