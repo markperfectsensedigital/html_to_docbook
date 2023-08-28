@@ -74,9 +74,7 @@
                 <xsl:otherwise>
                     <xsl:apply-templates/>
                 </xsl:otherwise>
-
             </xsl:choose>
-
         </listitem>
 
     </xsl:template>
@@ -129,8 +127,44 @@
         </informalfigure>
     </xsl:template>
 
+<!-- Tables -->
+
+    <xsl:template match="table">
+        <informaltable>
+            <xsl:apply-templates/>
+        </informaltable>
+    </xsl:template>
+
+    <xsl:template match="tbody">
+        <tbody>
+            <xsl:apply-templates/>
+        </tbody>
+    </xsl:template>
+
+    <xsl:template match="tr">
+        <tr>
+            <xsl:apply-templates/>
+        </tr>
+    </xsl:template>
 
 
+
+    <xsl:template match="td">
+    <td>
+        <xsl:choose>
+                <xsl:when test="not(child::p)">
+                    <!-- Some HTML <td> tags have no child <p>, so supply those. -->
+                    <para>
+                        <xsl:apply-templates/>
+                    </para>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:apply-templates/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </td>
+    </xsl:template>
+ 
     <!-- Paragraph and text -->
     <xsl:template match="p">
         <xsl:choose>
