@@ -5,7 +5,9 @@
 <xsl:template name="get_snippet_id">
 <!-- Returns a UUID corresponding to a snippet -->
     <xsl:param name="text"/>
+    <xsl:param name="current_node_id"/>
     <xsl:variable name="stripped_text" select="normalize-space($text)"/>
+
     <xsl:choose>
       <xsl:when test="starts-with($stripped_text,'Significant defects addressed')">UUID-0000017c-ec46-d391-ab7f-fec787a60000</xsl:when>
       <xsl:when test="starts-with($stripped_text,'Significant improvements')">UUID-00000183-13c9-d665-af9b-fbd95d500000</xsl:when>

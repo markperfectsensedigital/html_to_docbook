@@ -84,6 +84,8 @@ print("Assembled list of URLs")
 
 xml_extract_path = 'xml_extracts'
 html_download_path = 'html_downloads'
+docbook_path_xi_includes = 'docbook_files_xi_includes'
+docbook_path_duplicate_ids = 'docbook_files_duplicate_ids'
 docbook_path = 'docbook_files'
 image_path = 'images'
 
@@ -221,24 +223,46 @@ if args.extract == True:
 		temporary_xml.close()
 
 
+if os.path.exists(docbook_path_xi_includes):
+	shutil.rmtree(docbook_path_xi_includes, ignore_errors=True)
+os.mkdir(docbook_path_xi_includes)
+
+if os.path.exists(docbook_path_duplicate_ids):
+	shutil.rmtree(docbook_path_duplicate_ids, ignore_errors=True)
+os.mkdir(docbook_path_duplicate_ids)
+
 if os.path.exists(docbook_path):
 	shutil.rmtree(docbook_path, ignore_errors=True)
 os.mkdir(docbook_path)
+
 
 print("Converting extracted XML to docbook...")
 for xml_input_file in os.listdir(xml_extract_path):
 	print("Transforming file xml_extracts/{0}".format(xml_input_file))
 	
-	source_file = "xml_extracts/" + xml_input_file
-
-	saxon_command = "saxon -s:{0} -xsl:clean_xml_extract.xsl -o:{1}/{2}".format(source_file,docbook_path, xml_input_file)
+	saxon_command = "saxon -s:{0}/{1} -xsl:clean_xml_extract.xsl -o:{2}/{1}".format(xml_extract_path, xml_input_file,docbook_path_xi_includes)
 	print(saxon_command)
 	status = os.system(saxon_command)
 	if status != 0:
 		sys.exit()
-	xmllint_command = "xmllint --schema docbook.xsd --noout {0}/{1}".format(docbook_path, xml_input_file)
-	print(xmllint_command)
-	status = os.system(xmllint_command)
+
+
+	xmllint_command_1 = 'xmllint --path "/Users/mlautman/Documents/scripts/python/html_to_docbook/" --xinclude {0}/{1} > {2}/{1}'.format(docbook_path_xi_includes,xml_input_file,docbook_path_duplicate_ids)
+	print(xmllint_command_1)
+	status = os.system(xmllint_command_1)
+	if status != 0:
+		sys.exit()	
+
+	saxon_command = "saxon -s:{0}/{1} -xsl:clean_ids.xsl -o:{2}/{1}".format(docbook_path_duplicate_ids,xml_input_file,docbook_path)
+	print(saxon_command)
+	status = os.system(saxon_command)
+	if status != 0:
+		sys.exit()
+
+
+	xmllint_command_2 = "xmllint --schema docbook.xsd --noout {0}/{1}".format(docbook_path, xml_input_file)
+	print(xmllint_command_2)
+	status = os.system(xmllint_command_2)
 	if status != 0:
 		sys.exit()
 

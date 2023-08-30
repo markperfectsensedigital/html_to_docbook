@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xpath-default-namespace="http://www.w3.org/TR/html4/"
-    xmlns="http://docbook.org/ns/docbook">
+    xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude">
 
     <xsl:output method="xml" indent="true"/>
-    <xsl:include href="snippets.xsl"/>
+    <xsl:include href="snippets_lookup.xsl"/>
     <xsl:template match="/">
         <xsl:apply-templates />
     </xsl:template>
@@ -193,15 +193,17 @@ adds a corresponding message to the conversation topic.</para>
  -->
 
     <xsl:template match="span[@class='Term']">
-        <!--     <xsl:message><xsl:value-of select="."/></xsl:message> -->
-        <phrase>
-           <!--  <xsl:attribute name="xml:id">
+            <xsl:message><xsl:value-of select="."/></xsl:message>
+        <xi:include>
+            <xsl:attribute name="href">snippets.xml</xsl:attribute>
+            <xsl:attribute name="parse">xml</xsl:attribute>
+            <xsl:attribute name="xpointer">
                 <xsl:call-template name="get_snippet_id">
                     <xsl:with-param name="text" select="."/>
+                    <xsl:with-param name="current_node_id" select="generate-id()"/>
                 </xsl:call-template>
-            </xsl:attribute> -->
-            <xsl:apply-templates/>
-        </phrase>
+            </xsl:attribute>
+        </xi:include>
     </xsl:template>
 
     <xsl:template match="b">
